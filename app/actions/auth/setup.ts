@@ -1,53 +1,71 @@
-'use server';
+"use server";
 
-import { redirect } from 'next/navigation';
-
-import { prisma } from '@/app/lib/prisma';
-import { hashPassword } from '@/app/lib/auth/password';
-import { setupSchema } from '@/app/schemas/setup-schema';
+import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/lib/password";
+import { setupSchema } from "@/app/schemas/setup-schema";
+import { redirect } from "next/navigation";
 
 export async function createSetup(formData: FormData) {
-  const payload = {
-    schoolName: formData.get('schoolName')?.toString() ?? '',
-    schoolCode: formData.get('schoolCode')?.toString() ?? '',
-    adminName: formData.get('adminName')?.toString() ?? '',
-    username: formData.get('username')?.toString() ?? '',
-    password: formData.get('password')?.toString() ?? '',
-    confirmPassword: formData.get('confirmPassword')?.toString() ?? '',
-  };
+	const values = {
+		schoolName: formData.get("schoolName"),
+		schoolCode: formData.get("schoolCode"),
+		adminName: formData.get("adminName"),
+		username: formData.get("username"),
+		password: formData.get("password"),
+		confirmPassword: formData.get("confirmPassword"),
+	};
 
-  const parsed = setupSchema.safeParse(payload);
+	const result = setupSchema.safeParse(values);
 
-  if (!parsed.success) {
-    throw new Error('Please provide valid setup details.');
-  }
+	if (!result.success) {
+		return {
+			success: false,
+			message: result.error.issues[0].message,
+		};
+	}
 
-  const { data } = parsed;
-  const existingSchool = await prisma.school.findFirst();
+	// Prevent running setup twice
+	const existingSchool = await prisma.school.findFirst();
 
-  if (existingSchool) {
-    redirect('/admin');
-  }
+	if (existingSchool) {
+		return {
+			success: false,
+			message: "School has already been configured.",
+		};
+	}
 
-  const hashedPassword = await hashPassword(data.password);
+	// Prevent duplicate username
+	const existingUser = await prisma.user.findUnique({
+		where: {
+			username: result.data.username,
+		},
+	});
 
-  const school = await prisma.school.create({
-    data: {
-      name: data.schoolName,
-      code: data.schoolCode,
-    },
-  });
+	if (existingUser) {
+		return {
+			success: false,
+			message: "Username already exists.",
+		};
+	}
 
-  await prisma.user.create({
-    data: {
-      username: data.username,
-      password: hashedPassword,
-      name: data.adminName,
-      role: 'ADMIN',
-      schoolId: school.id,
-    },
-  });
+	const hashedPassword = await hashPassword(result.data.password);
 
-  redirect('/admin');
+	const school = await prisma.school.create({
+		data: {
+			name: result.data.schoolName,
+			code: result.data.schoolCode,
+		},
+	});
+
+	await prisma.user.create({
+		data: {
+			name: result.data.adminName,
+			username: result.data.username,
+			password: hashedPassword,
+			role: "ADMIN",
+			schoolId: school.id,
+		},
+	});
+
+	redirect("/login");
 }
-

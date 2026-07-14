@@ -1,22 +1,27 @@
-'use server';
+"use server";
 
-import { redirect } from 'next/navigation';
-import { loginSchema } from '@/app/schemas/login-schema';
+import { redirect } from "next/navigation";
+import { loginUser as loginUserService } from "@/lib/services/auth.service";
 
-export async function loginUser(formData: FormData): Promise<void> {
-  const payload = {
-    username: formData.get('username')?.toString() ?? '',
-    password: formData.get('password')?.toString() ?? '',
-  };
+export async function loginUser(formData: FormData) {
+  const username = String(formData.get("username"));
+  const password = String(formData.get("password"));
 
-  const parsed = loginSchema.safeParse(payload);
+  const result = await loginUserService(username, password);
 
-  if (!parsed.success) {
-    throw new Error('Invalid username or password.');
+  if (!result.success) {
+    throw new Error(result.message);
   }
 
-  // TODO: Implement login logic with Prisma and authentication
-  // For now, redirect to dashboard as placeholder
-  redirect('/admin');
-}
+  // Redirect based on user role
+  const user = result.user;
+  if (user?.role === "ADMIN") {
+    redirect("/admin");
+  } else if (user?.role === "TEACHER") {
+    redirect("/teacher");
+  } else if (user?.role === "PARENT") {
+    redirect("/parent");
+  }
 
+  redirect("/");
+}

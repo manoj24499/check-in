@@ -1,56 +1,91 @@
-'use client';
+"use client";
 
-import { createSetup } from '@/app/actions/auth/setup';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { setupSchema, SetupSchema } from "@/app/schemas/setup-schema";
+import { createSetup } from "@/app/actions/auth/setup";
 
-export function SetupForm() {
-  return (
-    <Card className="w-full max-w-2xl">
-      <CardHeader>
-        <CardTitle>Complete school setup</CardTitle>
-        <CardDescription>
-          Create your school profile and the first admin account.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form action={createSetup} className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="schoolName">School name</Label>
-              <Input id="schoolName" name="schoolName" placeholder="Green Valley School" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="schoolCode">School code</Label>
-              <Input id="schoolCode" name="schoolCode" placeholder="GVS" maxLength={10} required />
-            </div>
-          </div>
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <Label htmlFor="adminName">Admin name</Label>
-              <Input id="adminName" name="adminName" placeholder="Jane Doe" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input id="username" name="username" placeholder="admin" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input id="password" name="password" type="password" placeholder="••••••••" required />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm password</Label>
-              <Input id="confirmPassword" name="confirmPassword" type="password" placeholder="••••••••" required />
-            </div>
-          </div>
+export default function SetupForm() {
+	const {
+		register,
+		handleSubmit,
+		formState: { errors, isSubmitting },
+	} = useForm<SetupSchema>({
+		resolver: zodResolver(setupSchema),
+	});
 
-          <Button type="submit">Create setup</Button>
-        </form>
-      </CardContent>
-    </Card>
-  );
+	async function onSubmit(data: SetupSchema) {
+  const formData = new FormData();
+
+  formData.append("schoolName", data.schoolName);
+  formData.append("schoolCode", data.schoolCode);
+  formData.append("adminName", data.adminName);
+  formData.append("username", data.username);
+  formData.append("password", data.password);
+  formData.append("confirmPassword", data.confirmPassword);
+
+  await createSetup(formData);
 }
 
+	return (
+		<Card className="w-full max-w-lg shadow-xl">
+			<CardHeader>
+				<CardTitle className="text-3xl font-bold">Welcome 👋</CardTitle>
+
+				<p className="text-muted-foreground">Configure your school</p>
+			</CardHeader>
+
+			<CardContent>
+				<form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+					<div>
+						<Input placeholder="School Name" {...register("schoolName")} />
+						<p className="text-sm text-red-500">{errors.schoolName?.message}</p>
+					</div>
+
+					<div>
+						<Input placeholder="School Code" {...register("schoolCode")} />
+						<p className="text-sm text-red-500">{errors.schoolCode?.message}</p>
+					</div>
+
+					<div>
+						<Input placeholder="Admin Name" {...register("adminName")} />
+						<p className="text-sm text-red-500">{errors.adminName?.message}</p>
+					</div>
+
+					<div>
+						<Input placeholder="Username" {...register("username")} />
+						<p className="text-sm text-red-500">{errors.username?.message}</p>
+					</div>
+
+					<div>
+						<Input
+							type="password"
+							placeholder="Password"
+							{...register("password")}
+						/>
+						<p className="text-sm text-red-500">{errors.password?.message}</p>
+					</div>
+
+					<div>
+						<Input
+							type="password"
+							placeholder="Confirm Password"
+							{...register("confirmPassword")}
+						/>
+						<p className="text-sm text-red-500">
+							{errors.confirmPassword?.message}
+						</p>
+					</div>
+
+					<Button type="submit" className="w-full" disabled={isSubmitting}>
+						{isSubmitting ? "Creating..." : "Create School"}
+					</Button>
+				</form>
+			</CardContent>
+		</Card>
+	);
+}
