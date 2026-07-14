@@ -13,12 +13,6 @@ enum UserRole {
   PARENT
 }
 
-enum Gender {
-  MALE
-  FEMALE
-  OTHER
-}
-
 enum AttendanceStatus {
   CHECKED_IN
   CHECKED_OUT
@@ -33,23 +27,27 @@ enum VerificationMethod {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  name        String
-  email       String   @unique
-  password    String
-  phone       String?
-  role        UserRole
-  isActive    Boolean  @default(true)
+  id String @id @default(uuid())
 
-  // Parent relationship
+  username String @unique
+  password String
+
+  name  String
+  phone String?
+
+  role UserRole
+
+  isActive Boolean @default(true)
+
   children    ParentStudent[]
-
-  // Teacher relationship
   attendances Attendance[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  notifications Notification[]
+  auditLogs     AuditLog[]
 }
+
 enum Gender {
   MALE
   FEMALE
@@ -57,88 +55,90 @@ enum Gender {
 }
 
 model Student {
-  id                String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  admissionNumber   String   @unique
+  admissionNumber String @unique
 
-  firstName         String
-  lastName          String
+  firstName String
+  lastName  String
 
-  dateOfBirth       DateTime
-  gender            Gender
+  dateOfBirth DateTime
+  gender      Gender
 
-  grade             String
-  section           String
+  grade   String
+  section String
 
-  photoUrl          String?
+  photoUrl String?
 
-  pickupPin         String
+  pickupPin String
 
-  isActive          Boolean  @default(true)
+  isActive Boolean @default(true)
 
-  parents           ParentStudent[]
+  parents ParentStudent[]
 
-  attendances       Attendance[]
+  attendances Attendance[]
 
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
 model ParentStudent {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  parentId    String
-  studentId   String
+  parentId  String
+  studentId String
 
-  parent      User     @relation(fields: [parentId], references: [id])
-  student     Student  @relation(fields: [studentId], references: [id])
+  parent  User    @relation(fields: [parentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@unique([parentId, studentId])
 }
+
 model Attendance {
-  id                 String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  studentId          String
-  teacherId          String
+  studentId String
+  teacherId String
 
-  checkIn            DateTime?
-  checkOut           DateTime?
+  checkIn  DateTime?
+  checkOut DateTime?
 
-  status             AttendanceStatus
+  status AttendanceStatus
 
   verificationMethod VerificationMethod
 
-  student            Student @relation(fields: [studentId], references: [id])
+  student Student @relation(fields: [studentId], references: [id])
 
-  teacher            User    @relation(fields: [teacherId], references: [id])
+  teacher User @relation(fields: [teacherId], references: [id])
 
-  createdAt          DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Notification {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  title       String
-  message     String
+  title   String
+  message String
 
-  userId      String
+  userId String
 
-  user        User     @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  isRead      Boolean  @default(false)
+  isRead Boolean @default(false)
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 }
 
 model AuditLog {
-  id          String   @id @default(cuid())
+  id String @id @default(cuid())
 
-  action      String
+  action String
 
-  userId      String
+  userId String
 
-  user         User    @relation(fields: [userId], references: [id])
+  user User @relation(fields: [userId], references: [id])
 
-  createdAt    DateTime @default(now())
+  createdAt DateTime @default(now())
 }
