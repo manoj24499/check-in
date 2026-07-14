@@ -1,10 +1,14 @@
-generator client {
-  provider = "prisma-client"
-  output   = "../app/generated/prisma"
-}
+// generator client {
+//   provider = "prisma-client"
+//   output   = "../app/generated/prisma"
+// }
 
+generator client {
+  provider = "prisma-client-js"
+}
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 enum UserRole {
@@ -32,15 +36,20 @@ model User {
   username String @unique
   password String
 
-  name  String
+  name String
+
   phone String?
 
   role UserRole
 
   isActive Boolean @default(true)
 
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  schoolId String
+  school   School @relation(fields: [schoolId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   parentStudents ParentStudent[]
   attendances    Attendance[]
   notifications  Notification[]
@@ -67,7 +76,7 @@ model Student {
   grade   String
   section String
 
- photo String?
+  photo String?
 
   pickupPin String
 
@@ -79,6 +88,8 @@ model Student {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  school    School?  @relation(fields: [schoolId], references: [id])
+  schoolId  String?
 }
 
 model ParentStudent {
@@ -143,14 +154,18 @@ model AuditLog {
 }
 
 model School {
-  id      String  @id @default(uuid())
-  name    String
+  id String @id @default(uuid())
+
+  name String
+  code String @unique
+
   address String?
   phone   String?
   email   String?
-
   logoUrl String?
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  users     User[]
+  students  Student[]
 }

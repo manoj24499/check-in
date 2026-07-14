@@ -1,14 +1,20 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const setupSchema = z.object({
-  schoolName: z.string().trim().min(2, 'School name is required.'),
-  schoolAddress: z.string().trim().optional().or(z.literal('')),
-  schoolPhone: z.string().trim().optional().or(z.literal('')),
-  schoolEmail: z.string().trim().email('Enter a valid email address.').optional().or(z.literal('')),
-  adminName: z.string().trim().min(2, 'Admin name is required.'),
-  adminUsername: z.string().trim().min(3, 'Admin username must be at least 3 characters.'),
-  adminPassword: z.string().min(6, 'Password must be at least 6 characters.'),
-  adminPhone: z.string().trim().optional().or(z.literal('')),
-});
+export const setupSchema = z
+  .object({
+    schoolName: z.string().min(3, "School name is required"),
+    schoolCode: z
+      .string()
+      .min(3, "School code is required")
+      .max(10, "School code is too long"),
+    adminName: z.string().min(3, "Admin name is required"),
+    username: z.string().min(4, "Username must be at least 4 characters"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
-export type SetupFormValues = z.infer<typeof setupSchema>;
+export type SetupSchema = z.infer<typeof setupSchema>;

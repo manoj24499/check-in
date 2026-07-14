@@ -19,3 +19,4 @@ export async function loginUser(formData: FormData): Promise<void> {
   // For now, redirect to dashboard as placeholder
   redirect('/admin');
 }
+

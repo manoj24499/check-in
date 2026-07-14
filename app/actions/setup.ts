@@ -1,58 +1,56 @@
-'use server';
+"use server";
 
-import { redirect } from 'next/navigation';
+import { prisma } from "@/lib/prisma";
+import { hashPassword } from "@/lib/password";
+import { setupSchema } from "@/schemas/setup-schema";
+import { redirect } from "next/navigation";
 
-import { prisma } from '@/app/lib/prisma';
-import { hashPassword } from '@/app/lib/password';
-import { setupSchema } from '@/app/schemas/setup-schema';
-
-export async function createSetup(formData: FormData) {
-  const payload = {
-    schoolName: formData.get('schoolName')?.toString() ?? '',
-    schoolAddress: formData.get('schoolAddress')?.toString() ?? '',
-    schoolPhone: formData.get('schoolPhone')?.toString() ?? '',
-    schoolEmail: formData.get('schoolEmail')?.toString() ?? '',
-    adminName: formData.get('adminName')?.toString() ?? '',
-    adminUsername: formData.get('adminUsername')?.toString() ?? '',
-    adminPassword: formData.get('adminPassword')?.toString() ?? '',
-    adminPhone: formData.get('adminPhone')?.toString() ?? '',
+export async function setupSchool(formData: FormData) {
+  const values = {
+    schoolName: formData.get("schoolName"),
+    schoolCode: formData.get("schoolCode"),
+    adminName: formData.get("adminName"),
+    username: formData.get("username"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
   };
 
-  const parsed = setupSchema.safeParse(payload);
+  const result = setupSchema.safeParse(values);
 
-  if (!parsed.success) {
-    throw new Error('Please provide valid setup details.');
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.error.issues[0].message,
+    };
   }
 
-  const { data } = parsed;
-  const existingSchool = await prisma.school.findFirst();
+  const schoolExists = await prisma.school.findFirst();
 
-  if (existingSchool) {
-    redirect('/admin');
+  if (schoolExists) {
+    return {
+      success: false,
+      error: "School already exists.",
+    };
   }
 
-  const hashedPassword = await hashPassword(data.adminPassword);
+  const hashedPassword = await hashPassword(result.data.password);
 
-  await prisma.$transaction(async (tx) => {
-    await tx.school.create({
-      data: {
-        name: data.schoolName,
-        address: data.schoolAddress || null,
-        phone: data.schoolPhone || null,
-        email: data.schoolEmail || null,
-      },
-    });
-
-    await tx.user.create({
-      data: {
-        username: data.adminUsername,
-        password: hashedPassword,
-        name: data.adminName,
-        phone: data.adminPhone || null,
-        role: 'ADMIN',
-      },
-    });
+  const school = await prisma.school.create({
+    data: {
+      name: result.data.schoolName,
+      code: result.data.schoolCode,
+    },
   });
 
-  redirect('/admin');
+  await prisma.user.create({
+    data: {
+      username: result.data.username,
+      password: hashedPassword,
+      name: result.data.adminName,
+      role: "ADMIN",
+      schoolId: school.id,
+    },
+  });
+
+  redirect("/login");
 }
