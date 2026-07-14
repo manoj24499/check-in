@@ -39,13 +39,12 @@ model User {
 
   isActive Boolean @default(true)
 
-  children    ParentStudent[]
-  attendances Attendance[]
-
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  notifications Notification[]
-  auditLogs     AuditLog[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  parentStudents ParentStudent[]
+  attendances    Attendance[]
+  notifications  Notification[]
+  auditLogs      AuditLog[]
 }
 
 enum Gender {
@@ -68,7 +67,7 @@ model Student {
   grade   String
   section String
 
-  photoUrl String?
+ photo String?
 
   pickupPin String
 
@@ -141,4 +140,17 @@ model AuditLog {
   user User @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
+}
+
+model School {
+  id      String  @id @default(uuid())
+  name    String
+  address String?
+  phone   String?
+  email   String?
+
+  logoUrl String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
