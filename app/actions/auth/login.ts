@@ -1,7 +1,10 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
 import { loginUser as loginUserService } from "@/lib/services/auth.service";
+import { createSession } from "@/lib/services/session.service";
 
 export async function loginUser(formData: FormData) {
   const username = String(formData.get("username"));
@@ -13,15 +16,21 @@ export async function loginUser(formData: FormData) {
     throw new Error(result.message);
   }
 
-  // Redirect based on user role
-  const user = result.user;
-  if (user?.role === "ADMIN") {
-    redirect("/admin");
-  } else if (user?.role === "TEACHER") {
-    redirect("/teacher");
-  } else if (user?.role === "PARENT") {
-    redirect("/parent");
+  if (!result.user) {
+    throw new Error("User not found");
   }
 
-  redirect("/");
+  const token = await createSession(result.user.id);
+
+  const cookieStore = await cookies();
+
+  cookieStore.set("session", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+
+  redirect("/admin");
 }

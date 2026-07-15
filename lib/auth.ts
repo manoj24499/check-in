@@ -1,17 +1,20 @@
-import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
+import { getSession } from "@/lib/services/session.service";
 
-export async function getUserByUsername(username: string) {
-  return prisma.user.findUnique({
-    where: {
-      username,
-    },
-  });
-}
+export async function getCurrentUser() {
+  const cookieStore = await cookies();
 
-export async function getUserById(id: string) {
-  return prisma.user.findUnique({
-    where: {
-      id,
-    },
-  });
+  const token = cookieStore.get("session")?.value;
+
+  if (!token) return null;
+
+  const session = await getSession(token);
+
+  if (!session) return null;
+
+  if (session.expiresAt < new Date()) {
+    return null;
+  }
+
+  return session.user;
 }

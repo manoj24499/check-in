@@ -3,8 +3,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { loginSchema, type LoginSchema } from "@/schemas/login-schema";
-import { login } from "@/actions/auth/login";
+import { loginSchema, type LoginSchema } from "@/app/schemas/login-schema";
+import { loginUser as login } from "@/app/actions/auth/login";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
