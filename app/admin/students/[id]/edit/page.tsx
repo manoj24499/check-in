@@ -1,25 +1,29 @@
+import { notFound } from "next/navigation";
+import { getStudentById } from "@/lib/services/student.service";
 import { StudentForm } from "@/components/student/student-form";
 
-interface EditStudentPageProps {
-  params: {
+interface PageProps {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
-export default async function EditStudentPage({ params }: EditStudentPageProps) {
+export default async function EditStudentPage({ params }: PageProps) {
   const { id } = await params;
-  
-  return (
-    <div className="p-8 space-y-6 max-w-2xl mx-auto">
-      <div>
-        <h1 className="text-3xl font-bold">Edit Student</h1>
-        <p className="text-muted-foreground mt-2">Update the details for student ID: {id}</p>
-      </div>
 
-      <div className="bg-card rounded-xl border p-6">
-        {/* Pass initial data to form if fetched here */}
-        <StudentForm studentId={id} />
-      </div>
+  const student = await getStudentById(id);
+
+  if (!student) {
+    notFound();
+  }
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold mb-6">
+        Edit Student
+      </h1>
+
+      <StudentForm student={student} />
     </div>
   );
 }

@@ -1,15 +1,80 @@
 import { prisma } from "@/lib/prisma";
 
-export async function getStudents() {
-  return await prisma.student.findMany({
-    orderBy: { createdAt: "desc" },
-  });
-}
+export async function getStudents(search?: string) {
+  return prisma.student.findMany({
+    where: search
+      ? {
+          OR: [
+            {
+              firstName: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              lastName: {
+                contains: search,
+                mode: "insensitive",
+              },
+            },
+            {
+              admissionNumber: {
+                contains: search,
+                mode: "insensitive",
+              }, 
+            },
+          ],
+        }
+      : undefined,
 
-export async function getStudentById(id: string) {
-  return await prisma.student.findUnique({
-    where: { id },
+    orderBy: {
+      createdAt: "desc",
+    },
   });
 }
 
 // Add more service methods as needed
+export async function createStudent(data: {
+  admissionNumber: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth: Date;
+  gender: "MALE" | "FEMALE" | "OTHER";
+  grade: string;
+  section: string;
+  pickupPin: string;
+  schoolId: string;
+}) {
+  return prisma.student.create({
+    data,
+  });
+}
+export async function updateStudent(
+  id: string,
+  data: {
+    admissionNumber: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: Date;
+    gender: "MALE" | "FEMALE" | "OTHER";
+    grade: string;
+    section: string;
+    pickupPin: string;
+  }
+) {
+  return prisma.student.update({
+    where: { id },
+    data,
+  });
+}
+export async function deleteStudent(id: string) {
+  return prisma.student.delete({
+    where: { id },
+  });
+}
+
+export async function getStudentById(id: string) {
+  return prisma.student.findUnique({
+    where: { id },
+  });
+}

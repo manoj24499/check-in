@@ -1,39 +1,98 @@
 "use client";
+import { createStudent } from "@/actions/student/create";
+import { updateStudent } from "@/actions/student/update";
 
 interface StudentFormProps {
-  studentId?: string;
+  student?: {
+    id: string;
+    admissionNumber: string;
+    firstName: string;
+    lastName: string;
+    dateOfBirth: Date;
+    gender: "MALE" | "FEMALE" | "OTHER";
+    grade: string;
+    section: string;
+    pickupPin: string;
+  };
 }
 
-export function StudentForm({ studentId }: StudentFormProps) {
+export function StudentForm({ student }: StudentFormProps) {
   return (
-    <form className="space-y-4">
-      <div>
-        <label className="block text-sm font-medium mb-1">First Name</label>
-        <input 
-          type="text" 
-          name="firstName" 
-          className="w-full p-2 border rounded-md" 
-          placeholder="First Name"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1">Last Name</label>
-        <input 
-          type="text" 
-          name="lastName" 
-          className="w-full p-2 border rounded-md" 
-          placeholder="Last Name"
-        />
-      </div>
-      {/* Add remaining form fields */}
-      <div className="pt-4 flex justify-end gap-2">
-        <button type="button" className="px-4 py-2 border rounded-md hover:bg-accent">
-          Cancel
-        </button>
-        <button type="submit" className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90">
-          {studentId ? "Update" : "Create"} Student
-        </button>
-      </div>
+    <form
+      action={student ? updateStudent : createStudent}
+      className="space-y-4"
+    >
+      {student && <input type="hidden" name="id" value={student.id} />}
+
+      <input
+        name="admissionNumber"
+        placeholder="Admission Number"
+        defaultValue={student?.admissionNumber}
+        className="w-full border p-2 rounded"
+      />
+
+      <input
+        name="firstName"
+        placeholder="First Name"
+        defaultValue={student?.firstName}
+        className="w-full border p-2 rounded"
+      />
+
+      <input
+        name="lastName"
+        placeholder="Last Name"
+        defaultValue={student?.lastName}
+        className="w-full border p-2 rounded"
+      />
+
+      <input
+        type="date"
+        name="dateOfBirth"
+        defaultValue={
+          student?.dateOfBirth
+            ? new Date(student.dateOfBirth).toISOString().split("T")[0]
+            : ""
+        }
+        className="w-full border p-2 rounded"
+      />
+
+      <select
+        name="gender"
+        defaultValue={student?.gender}
+        className="w-full border p-2 rounded"
+      >
+        <option value="MALE">Male</option>
+        <option value="FEMALE">Female</option>
+        <option value="OTHER">Other</option>
+      </select>
+
+      <input
+        name="grade"
+        placeholder="Grade"
+        defaultValue={student?.grade}
+        className="w-full border p-2 rounded"
+      />
+
+      <input
+        name="section"
+        placeholder="Section"
+        defaultValue={student?.section}
+        className="w-full border p-2 rounded"
+      />
+
+      <input
+        name="pickupPin"
+        placeholder="Pickup PIN"
+        defaultValue={student?.pickupPin}
+        className="w-full border p-2 rounded"
+      />
+
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-4 py-2 rounded"
+      >
+        {student ? "Update Student" : "Create Student"}
+      </button>
     </form>
   );
 }
