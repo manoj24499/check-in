@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { getSession } from "@/lib/services/session.service";
+import { getSession, deleteSession } from "@/lib/services/session.service";
 
 export async function getCurrentUser() {
   const cookieStore = await cookies();
@@ -13,6 +13,7 @@ export async function getCurrentUser() {
   if (!session) return null;
 
   if (session.expiresAt < new Date()) {
+    await deleteSession(token);
     return null;
   }
 

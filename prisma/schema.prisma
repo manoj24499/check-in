@@ -93,6 +93,8 @@ model Student {
 
   photo String?
 
+  qrCode String? @unique
+
   pickupPin String
 
   isActive Boolean @default(true)
@@ -193,9 +195,8 @@ model Teacher {
 
   firstName String
   lastName  String
-
-  email String?
-  phone String?
+  email     String?
+  phone     String?
 
   subject String?
 

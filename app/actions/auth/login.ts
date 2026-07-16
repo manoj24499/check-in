@@ -32,5 +32,18 @@ export async function loginUser(formData: FormData) {
     maxAge: 60 * 60 * 24 * 7,
   });
 
-  redirect("/admin");
+  // redirect("/admin");
+  switch (result.user.role) {
+  case "ADMIN":
+    redirect("/admin");
+
+  case "TEACHER":
+    redirect("/teacher");
+
+  case "PARENT":
+    redirect("/parent");
+
+  default:
+    redirect("/");
+}
 }

@@ -21,7 +21,7 @@ export async function getStudents(search?: string) {
               admissionNumber: {
                 contains: search,
                 mode: "insensitive",
-              }, 
+              },
             },
           ],
         }
@@ -44,6 +44,7 @@ export async function createStudent(data: {
   section: string;
   pickupPin: string;
   schoolId?: string;
+  qrCode: string;
 }) {
   // Ensure provided schoolId exists; if not provided, omit to avoid FK violation
   const { schoolId, ...studentData } = data;
@@ -51,6 +52,7 @@ export async function createStudent(data: {
   if (schoolId) {
     createData.schoolId = schoolId;
   }
+  console.log("Creating student with data:", data);
   return prisma.student.create({
     data: createData,
   });
@@ -66,7 +68,7 @@ export async function updateStudent(
     grade: string;
     section: string;
     pickupPin: string;
-  }
+  },
 ) {
   return prisma.student.update({
     where: { id },

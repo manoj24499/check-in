@@ -1,9 +1,18 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { randomUUID } from "crypto";
 import { createStudent as createStudentService } from "@/lib/services/student.service";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function createStudent(formData: FormData) {
+  const qrCode = randomUUID();
+  console.log("Generated QR:", qrCode);
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    redirect("/login");
+  }
+
   await createStudentService({
     admissionNumber: String(formData.get("admissionNumber")),
     firstName: String(formData.get("firstName")),
@@ -13,7 +22,8 @@ export async function createStudent(formData: FormData) {
     grade: String(formData.get("grade")),
     section: String(formData.get("section")),
     pickupPin: String(formData.get("pickupPin")),
-    schoolId: "86f11074-2e62-4dab-8fe8-a7b3d06923f5", // Temporary
+    schoolId: currentUser.schoolId,
+    qrCode,
   });
 
   redirect("/admin/students");

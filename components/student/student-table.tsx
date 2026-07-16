@@ -54,6 +54,9 @@ export async function StudentTable({ search }: { search?: string }) {
                 >
                   Edit
                 </Link>
+                <Link href={`/admin/students/${student.id}`}>
+                  {student.firstName} {student.lastName}
+                </Link>
                 <form action={deleteStudent}>
                   <input type="hidden" name="id" value={student.id} />
 
