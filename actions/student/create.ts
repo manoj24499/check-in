@@ -13,7 +13,7 @@ export async function createStudent(formData: FormData) {
     grade: String(formData.get("grade")),
     section: String(formData.get("section")),
     pickupPin: String(formData.get("pickupPin")),
-    schoolId: "441481ee-0ded-4f20-bd0d-ea9cf9746079", // Temporary
+    schoolId: "86f11074-2e62-4dab-8fe8-a7b3d06923f5", // Temporary
   });
 
   redirect("/admin/students");

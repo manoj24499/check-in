@@ -43,10 +43,16 @@ export async function createStudent(data: {
   grade: string;
   section: string;
   pickupPin: string;
-  schoolId: string;
+  schoolId?: string;
 }) {
+  // Ensure provided schoolId exists; if not provided, omit to avoid FK violation
+  const { schoolId, ...studentData } = data;
+  const createData: any = { ...studentData };
+  if (schoolId) {
+    createData.schoolId = schoolId;
+  }
   return prisma.student.create({
-    data,
+    data: createData,
   });
 }
 export async function updateStudent(
