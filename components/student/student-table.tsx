@@ -54,7 +54,10 @@ export async function StudentTable({ search }: { search?: string }) {
                 >
                   Edit
                 </Link>
-                <Link href={`/admin/students/${student.id}`}>
+                <Link
+                  href={`/admin/students/${student.id}`}
+                  className="text-blue-600 hover:underline"
+                >
                   {student.firstName} {student.lastName}
                 </Link>
                 <form action={deleteStudent}>
