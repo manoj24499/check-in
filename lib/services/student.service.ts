@@ -86,3 +86,10 @@ export async function getStudentById(id: string) {
     where: { id },
   });
 }
+export async function getStudentByQRCode(qrCode: string) {
+  return prisma.student.findUnique({
+    where: {
+      qrCode,
+    },
+  });
+}
