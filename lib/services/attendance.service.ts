@@ -61,3 +61,17 @@ export async function checkOutAttendance(id: string) {
     },
   });
 }
+
+export async function getTodayAttendance(studentId: string) {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  return prisma.attendance.findFirst({
+    where: {
+      studentId,
+      createdAt: {
+        gte: startOfDay,
+      },
+    },
+  });
+}

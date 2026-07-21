@@ -34,16 +34,16 @@ export async function loginUser(formData: FormData) {
 
   // redirect("/admin");
   switch (result.user.role) {
-  case "ADMIN":
-    redirect("/admin");
+    case "ADMIN":
+      redirect("/admin");
 
-  case "TEACHER":
-    redirect("/teacher");
+    case "TEACHER":
+      redirect("/teacher/dashboard");
 
-  case "PARENT":
-    redirect("/parent");
+    case "PARENT":
+      redirect("/parent/dashboard");
 
-  default:
-    redirect("/");
-}
+    default:
+      redirect("/login");
+  }
 }
